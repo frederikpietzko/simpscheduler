@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.singleOrNull
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insertAndGetId
 import org.jetbrains.exposed.v1.r2dbc.selectAll
@@ -86,11 +87,54 @@ object UserRepository {
         UserTable.deleteWhere { UserTable.id eq id.value }
     }
 
+    /**
+     * Deletes all users from the database.
+     * This method is primarily intended for testing purposes.
+     */
+    suspend fun deleteAll() = suspendTransaction {
+        UserTable.deleteWhere { UserTable.id neq null }
+    }
+
+    /**
+     * Finds a user by their username or returns null if no user is found.
+     *
+     * @param username The username of the user to retrieve.
+     * @return The user associated with the given username, or null if no user is found.
+     */
+    suspend fun findByUsernameOrNull(username: Username) = suspendTransaction {
+        UserTable.selectAll().where { UserTable.username eq username.value }.map { it.toUser() }.singleOrNull()
+    }
+
+    /**
+     * Finds a user by their username or returns null if no user is found.
+     * This version includes the password hash for testing purposes.
+     *
+     * @param username The username of the user to retrieve.
+     * @return The user associated with the given username with password included, or null if no user is found.
+     */
+    suspend fun findByUsernameWithPasswordOrNull(username: Username) = suspendTransaction {
+        UserTable.selectAll().where { UserTable.username eq username.value }.map { it.toUserWithPassword() }.singleOrNull()
+    }
+
     private fun ResultRow.toUser() =
         User(
             id = UserId(this[UserTable.id].value),
             username = Username(this[UserTable.username]),
             password = null,
+            person =
+                Person(
+                    firstName = this[UserTable.firstName],
+                    lastName = this[UserTable.lastName],
+                    emailAddress = EmailAddress(this[UserTable.emailAddress]),
+                ),
+            createdAt = this[UserTable.createdAt],
+        )
+
+    private fun ResultRow.toUserWithPassword() =
+        User(
+            id = UserId(this[UserTable.id].value),
+            username = Username(this[UserTable.username]),
+            password = HashedPassword(this[UserTable.password]),
             person =
                 Person(
                     firstName = this[UserTable.firstName],

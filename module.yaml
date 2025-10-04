@@ -31,6 +31,11 @@ dependencies:
 test-dependencies:
   - $ktor.server.testHost
   - $kotlin.test.junit
+  - $libs.kotest
+  - $libs.mockk
+  - $libs.testcontainers
+  - $libs.testcontainers.postgresql
+  - $libs.testcontainers.junit.jupiter
 
 settings:
   kotlin:
@@ -43,3 +48,4 @@ settings:
     version: 3.3.0
   jvm:
     mainClass: io.ktor.server.cio.EngineMain
+  junit: junit-5

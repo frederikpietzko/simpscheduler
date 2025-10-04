@@ -2,6 +2,7 @@
 exposed = "1.0.0-rc-1"
 r2dbc-pg = "1.0.7.RELEASE"
 r2dbc-pool = "1.0.2.RELEASE"
+testcontainers = "1.21.3"
 
 [libraries]
 ktor-server-host-common = "io.ktor:ktor-server-host-common:3.3.0"
@@ -12,3 +13,8 @@ r2dbc-postgresql = { module = "org.postgresql:r2dbc-postgresql", version.ref = "
 r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
 kotlinLogging = { module = "io.github.oshai:kotlin-logging-jvm", version = "5.1.0" }
 bcrypt = { module = "org.mindrot:jbcrypt", version = "0.4" }
+kotest = { module = "io.kotest:kotest-assertions-core-jvm", version = "6.0.0" }
+mockk = { module = "io.mockk:mockk", version = "1.14.6" }
+testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }

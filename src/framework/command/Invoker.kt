@@ -40,7 +40,7 @@ fun Application.configureInvoker() {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <TCommandHandler : CommandHandler<*>> Application.addHandlers(vararg handler: TCommandHandler) =
+fun <TCommandHandler : CommandHandler<*>> addHandlers(vararg handler: TCommandHandler) =
     Invoker.addHandlers(*handler as Array<out CommandHandler<Command>>)
 
 suspend fun invoke(command: Command) = Invoker.invoke(command)
