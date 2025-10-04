@@ -24,7 +24,7 @@ class Invoker private constructor(
     }
 
     suspend fun invoke(command: Command) = commandHandlers
-        .firstOrNull { it.command == command::class.java }
+        .firstOrNull { it.command == command::class }
         ?.apply { handle(command) }
         ?: throw IllegalArgumentException("No handler found for command ${command::class.java}")
 }
