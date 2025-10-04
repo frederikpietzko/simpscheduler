@@ -18,7 +18,7 @@ class Invoker private constructor(
 
         val instance: Invoker get() = _instance
 
-        suspend operator fun invoke(command: Command) {
+        suspend fun invoke(command: Command) {
             instance.invoke(command)
         }
     }
@@ -36,3 +36,5 @@ fun Application.configureInvoker() {
 @Suppress("UNCHECKED_CAST")
 fun <TCommandHandler : CommandHandler<*>> Application.addHandlers(vararg handler: TCommandHandler) =
     Invoker.addHandlers(*handler as Array<out CommandHandler<Command>>)
+
+suspend fun invoke(command: Command) = Invoker.invoke(command)
