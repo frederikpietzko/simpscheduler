@@ -187,6 +187,8 @@ src/
     ├── commands/
     ├── domain/
     ├── handlers/
+    ├── views/                      # Kotlin HTML templates
+    │   └── RegisterUserView.kt    # HTML rendering with Ktor DSL
     └── persistence/
 ```
 
