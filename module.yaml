@@ -1,0 +1,43 @@
+product:
+  type: jvm/app
+
+dependencies:
+  - $ktor.server.compression
+  - $ktor.server.defaultHeaders
+  - $ktor.server.csrf
+  - $ktor.server.core
+  - $ktor.server.auth
+  - $ktor.server.contentNegotiation
+  - $ktor.server.sessions
+  - $ktor.serialization.kotlinx.json
+  - $libs.ktor.server.host.common
+  - $ktor.server.statusPages
+  - $ktor.server.callLogging
+  - $ktor.server.callId
+  - $libs.exposed.core
+  - $libs.exposed.r2dbc
+  - $libs.exposed.java.time
+  - $libs.r2dbc.postgresql
+  - $libs.r2dbc.pool
+  - $ktor.server.cio
+  - $logback.classic
+  - $ktor.server.configYaml
+  - $ktor.server.htmlBuilder
+  - $ktor.server.cors
+  - org.junit.jupiter:junit-jupiter-params:5.13.4
+
+test-dependencies:
+  - $ktor.server.testHost
+  - $kotlin.test.junit
+
+settings:
+  kotlin:
+    languageVersion: 2.2
+    serialization:
+      enabled: true
+      version: 1.9.0
+  ktor:
+    enabled: true
+    version: 3.3.0
+  jvm:
+    mainClass: io.ktor.server.cio.EngineMain

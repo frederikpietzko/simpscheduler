@@ -1,0 +1,12 @@
+[versions]
+exposed = "1.0.0-rc-1"
+r2dbc-pg = "1.0.7.RELEASE"
+r2dbc-pool = "1.0.2.RELEASE"
+
+[libraries]
+ktor-server-host-common = "io.ktor:ktor-server-host-common:3.3.0"
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-r2dbc = { module = "org.jetbrains.exposed:exposed-r2dbc", version.ref = "exposed" }
+exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposed" }
+r2dbc-postgresql = { module = "org.postgresql:r2dbc-postgresql", version.ref = "r2dbc-pg" }
+r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
