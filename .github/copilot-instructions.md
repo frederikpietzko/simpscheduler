@@ -565,3 +565,8 @@ class Navbar(private val brand: String, private val links: List<Pair<String, Str
     }
 }
 ```
+
+## Logging
+
+User KotlinLogging from `io.github.oshai.kotlinlogging.KotlinLogging`
+Check Invoker.kt for usage

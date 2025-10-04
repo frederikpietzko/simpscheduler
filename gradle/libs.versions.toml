@@ -10,3 +10,5 @@ exposed-r2dbc = { module = "org.jetbrains.exposed:exposed-r2dbc", version.ref = 
 exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposed" }
 r2dbc-postgresql = { module = "org.postgresql:r2dbc-postgresql", version.ref = "r2dbc-pg" }
 r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
+kotlinLogging = { module = "io.github.oshai:kotlin-logging-jvm", version = "5.1.0" }
+bcrypt = { module = "org.mindrot:jbcrypt", version = "0.4" }

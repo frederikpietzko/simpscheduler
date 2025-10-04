@@ -1,11 +1,13 @@
 package com.github.frederikpietzko.framework.command
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.*
 
 class Invoker private constructor(
     private val commandHandlers: MutableSet<CommandHandler<Command>> = mutableSetOf(),
 ) {
     companion object {
+        private val log = KotlinLogging.logger {}
         private lateinit var _instance: Invoker
 
         fun initialize() {
@@ -23,10 +25,14 @@ class Invoker private constructor(
         }
     }
 
-    suspend fun invoke(command: Command) = commandHandlers
-        .firstOrNull { it.command == command::class }
-        ?.apply { handle(command) }
-        ?: throw IllegalArgumentException("No handler found for command ${command::class.java}")
+    suspend fun invoke(command: Command) = commandHandlers.firstOrNull { it.command == command::class }?.also {
+        requireNotNull(
+            value = commandHandlers.firstOrNull { it.command == command::class }) { "No handler found for command ${command::class.java.simpleName}" }
+            .also {
+                log.info { "Handling Command $command with handler ${it::class.simpleName}." }
+            }
+            .apply { handle(command) }
+    }
 }
 
 fun Application.configureInvoker() {
