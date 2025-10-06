@@ -2,45 +2,43 @@ package com.github.frederikpietzko.users.domain
 
 data class ValidationError(val field: String, val message: String)
 
+class ValidationErrors : ArrayList<ValidationError>()
+
 object Validation {
-    fun validatePassword(password: String): ValidationError? {
+    fun ValidationErrors.validatePassword(password: String) {
         if (password.length < 8) {
-            return ValidationError("password", "Password must be at least 8 characters long")
+            add(ValidationError("password", "Password must be at least 8 characters long"))
         }
         if (!password.any { it.isDigit() }) {
-            return ValidationError("password", "Password must contain at least one number")
+            add(ValidationError("password", "Password must contain at least one number"))
         }
         if (!password.any { it.isUpperCase() }) {
-            return ValidationError("password", "Password must contain at least one uppercase letter")
+            add(ValidationError("password", "Password must contain at least one uppercase letter"))
         }
         if (!password.any { !it.isLetterOrDigit() }) {
-            return ValidationError("password", "Password must contain at least one symbol")
+            add(ValidationError("password", "Password must contain at least one symbol"))
         }
-        return null
     }
 
-    fun validateEmail(email: String): ValidationError? {
+    fun ValidationErrors.validateEmail(email: String) {
         val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$".toRegex()
         if (!email.matches(emailRegex)) {
-            return ValidationError("email", "Invalid email address format")
+            add(ValidationError("email", "Invalid email address format"))
         }
-        return null
     }
 
-    fun validateUsername(username: String): ValidationError? {
+    fun ValidationErrors.validateUsername(username: String) {
         if (username.isBlank()) {
-            return ValidationError("username", "Username cannot be empty")
+            add(ValidationError("username", "Username cannot be empty"))
         }
         if (username.length < 3) {
-            return ValidationError("username", "Username must be at least 3 characters long")
+            add(ValidationError("username", "Username must be at least 3 characters long"))
         }
-        return null
     }
 
-    fun validateName(name: String, fieldName: String): ValidationError? {
+    fun ValidationErrors.validateName(name: String, fieldName: String) {
         if (name.isBlank()) {
-            return ValidationError(fieldName, "${fieldName.replaceFirstChar { it.uppercase() }} cannot be empty")
+            add(ValidationError(fieldName, "${fieldName.replaceFirstChar { it.uppercase() }} cannot be empty"))
         }
-        return null
     }
 }

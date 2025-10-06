@@ -1,22 +1,28 @@
 package com.github.frederikpietzko.users
 
+import com.github.frederikpietzko.framework.command.CommandResult
 import com.github.frederikpietzko.framework.command.addHandlers
 import com.github.frederikpietzko.framework.command.invoke
 import com.github.frederikpietzko.ui.layout.Page
 import com.github.frederikpietzko.users.commands.CreateUserCommand
+import com.github.frederikpietzko.users.commands.LoginUserCommand
 import com.github.frederikpietzko.users.domain.*
+import com.github.frederikpietzko.users.domain.Validation.validateEmail
+import com.github.frederikpietzko.users.domain.Validation.validateName
+import com.github.frederikpietzko.users.domain.Validation.validatePassword
+import com.github.frederikpietzko.users.domain.Validation.validateUsername
 import com.github.frederikpietzko.users.handlers.CreateUserHandler
+import com.github.frederikpietzko.users.handlers.LoginUserHandler
 import com.github.frederikpietzko.users.views.respondRegisterUserView
+import com.github.frederikpietzko.users.views.respondLoginUserView
 import io.ktor.server.application.*
-import io.ktor.server.html.respondHtmlTemplate
+import io.ktor.server.html.*
 import io.ktor.server.request.*
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.server.routing.*
 import kotlinx.html.h1
 
 fun Application.configureUsers() {
-    addHandlers(CreateUserHandler)
+    addHandlers(CreateUserHandler, LoginUserHandler)
     routing {
         get("/") {
             call.respondHtmlTemplate(Page("SimpScheduler")) {
@@ -25,11 +31,58 @@ fun Application.configureUsers() {
                 }
             }
         }
-        
+
+        get("/login") {
+            call.respondLoginUserView()
+        }
+
+        post("/login") {
+            val parameters = call.receiveParameters()
+            val username = parameters["username"]?.trim() ?: ""
+            val password = parameters["password"] ?: ""
+
+            // Validate basic input
+            val errors = ValidationErrors()
+            if (username.isBlank()) {
+                errors.add(ValidationError("username", "Username is required"))
+            }
+            if (password.isBlank()) {
+                errors.add(ValidationError("password", "Password is required"))
+            }
+
+            if (errors.isNotEmpty()) {
+                call.respondLoginUserView(
+                    errors = errors,
+                    username = username
+                )
+            } else {
+                // Login user via command
+                val command = LoginUserCommand(
+                    username = Username(username),
+                    password = ClearPassword(password)
+                )
+                when (val result = invoke(command)) {
+                    is CommandResult.Failure<*> -> call.respondLoginUserView(
+                        errors = listOf(
+                            ValidationError("general", result.message)
+                        ),
+                        username = username
+                    )
+
+                    is CommandResult.Success<*> -> {
+                        // TODO: Set up session/authentication here
+                        call.respondLoginUserView(
+                            successMessage = "Login successful! Welcome back."
+                        )
+                    }
+                }
+            }
+        }
+
         get("/register") {
             call.respondRegisterUserView()
         }
-        
+
         post("/register") {
             val parameters = call.receiveParameters()
             val email = parameters["email"]?.trim() ?: ""
@@ -38,20 +91,21 @@ fun Application.configureUsers() {
             val lastName = parameters["lastName"]?.trim() ?: ""
             val password = parameters["password"] ?: ""
             val confirmPassword = parameters["confirmPassword"] ?: ""
-            
+
             // Validate all fields
-            val errors = mutableListOf<ValidationError>()
-            
-            Validation.validateEmail(email)?.let { errors.add(it) }
-            Validation.validateUsername(username)?.let { errors.add(it) }
-            Validation.validateName(firstName, "firstName")?.let { errors.add(it) }
-            Validation.validateName(lastName, "lastName")?.let { errors.add(it) }
-            Validation.validatePassword(password)?.let { errors.add(it) }
-            
+            val errors = ValidationErrors()
+            with(Validation) {
+                errors.validateEmail(email)
+                errors.validateUsername(username)
+                errors.validateName(firstName, "firstName")
+                errors.validateName(lastName, "lastName")
+                errors.validatePassword(password)
+            }
+
             if (password != confirmPassword) {
                 errors.add(ValidationError("confirmPassword", "Passwords do not match"))
             }
-            
+
             if (errors.isNotEmpty()) {
                 call.respondRegisterUserView(
                     errors = errors,
@@ -62,28 +116,31 @@ fun Application.configureUsers() {
                 )
             } else {
                 // Create user via command
-                try {
-                    val command = CreateUserCommand(
-                        username = Username(username),
-                        password = ClearPassword(password),
-                        person = Person(
-                            firstName = firstName,
-                            lastName = lastName,
-                            emailAddress = EmailAddress(email)
-                        )
+                val command = CreateUserCommand(
+                    username = Username(username),
+                    password = ClearPassword(password),
+                    person = Person(
+                        firstName = firstName,
+                        lastName = lastName,
+                        emailAddress = EmailAddress(email)
                     )
-                    invoke(command)
-                    
-                    call.respondRegisterUserView(
-                        successMessage = "Registration successful! Your account has been created."
-                    )
-                } catch (e: Exception) {
-                    call.respondRegisterUserView(
-                        errors = listOf(ValidationError("general", "An error occurred during registration: ${e.message}")),
+                )
+                when (val result = invoke(command)) {
+                    is CommandResult.Failure<*> -> call.respondRegisterUserView(
+                        errors = listOf(
+                            ValidationError(
+                                "general",
+                                "An error occurred during registration: ${result.message}"
+                            )
+                        ),
                         email = email,
                         username = username,
                         firstName = firstName,
                         lastName = lastName
+                    )
+
+                    is CommandResult.Success<*> -> call.respondRegisterUserView(
+                        successMessage = "Registration successful! Your account has been created."
                     )
                 }
             }

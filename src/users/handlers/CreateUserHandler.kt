@@ -1,6 +1,7 @@
 package com.github.frederikpietzko.users.handlers
 
 import com.github.frederikpietzko.framework.command.CommandHandler
+import com.github.frederikpietzko.framework.command.CommandResult
 import com.github.frederikpietzko.framework.command.Invoker
 import com.github.frederikpietzko.users.commands.CreateUserCommand
 import com.github.frederikpietzko.users.domain.HashedPassword
@@ -11,14 +12,18 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.mindrot.jbcrypt.BCrypt
 import kotlin.reflect.KClass
 
-object CreateUserHandler : CommandHandler<CreateUserCommand> {
+object CreateUserHandler : CommandHandler<CreateUserCommand, UserId> {
     private val logger = KotlinLogging.logger { }
     override val command: KClass<CreateUserCommand> = CreateUserCommand::class
 
-    override suspend fun Invoker.handle(command: CreateUserCommand) {
+    override suspend fun Invoker.handle(command: CreateUserCommand): CommandResult<UserId> {
         val user = command.toUser()
-        logger.info { "Hashing password for user: ${command.username.value}" }
-        UserRepository.insert(user)
+        if(UserRepository.findByUsernameOrNull(user.username) != null) {
+            logger.info { "Username already taken: ${user.username.value}" }
+            return CommandResult.failure("Username already taken")
+        }
+        logger.info { "Creating User(id=${user.id}, username=${user.username})" }
+        return CommandResult.success(UserRepository.insert(user))
     }
 
     private fun CreateUserCommand.toUser(): User {
